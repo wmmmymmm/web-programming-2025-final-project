@@ -14,15 +14,16 @@ if not st.session_state.api_key:
     st.info("あなたのGoogle Gemini APIキーを入力してください。")
     api_key_input = st.text_input("APIキーを入力", type="password", key="api_input")
 
-    if st.button("APIキーを設定") and api_key_input.strip():
-        st.session_state.api_key = api_key_input.strip()
-        st.success("APIキーが設定されました。")
-        st.experimental_rerun()
-
-    elif st.button("APIキーを設定"):
-        st.error("正しいキーを入力してください。")
+    if st.button("APIキーを設定"):
+        if api_key_input.strip():
+            st.session_state.api_key = api_key_input.strip()
+            st.success("APIキーが設定されました。")
+            st.experimental_rerun()
+        else:
+            st.error("正しいキーを入力してください。")
 
     st.stop()
+
 
 
 #APIキー設定
