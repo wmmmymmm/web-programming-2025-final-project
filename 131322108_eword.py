@@ -35,7 +35,41 @@ for key, val in defaults.items():
     if key not in st.session_state:
         st.session_state[key] = val
 
-# プロンプト生成など省略（元のまま）
+# --- ここから関数定義 ---
+
+def get_prompt(difficulty: str, mode: str, num=5):
+    if difficulty == "初級":
+        level_text = "中学校レベルの英単語（英検5級〜3級）"
+    elif difficulty == "中級":
+        level_text = "高校レベルの英単語（英検準2級〜2級）"
+    else:
+        level_text = "難しめの英単語（英検準1級〜TOEFLレベル）"
+
+    if mode == "en_to_ja":
+        direction_text = "英単語とその日本語の意味"
+    else:
+        direction_text = "日本語の意味とそれに対応する英単語"
+
+    return (
+        f"{level_text}からランダムに{num}個、{direction_text}をペアで出してください。\n"
+        f"フォーマットは「英単語: 意味」でお願いします。"
+    )
+
+def generate_questions(n=5, difficulty="中級", mode="en_to_ja"):
+    prompt = get_prompt(difficulty, mode, n)
+    response = model.generate_content(prompt)
+    lines = response.text.strip().split("\n")
+    questions = []
+    for line in lines:
+        if ":" in line:
+            word, meaning = line.split(":", 1)
+            questions.append({
+                "word": word.strip(),
+                "meaning": meaning.strip()
+            })
+    return questions[:n]
+
+# --- ここまで関数定義 ---
 
 # 難易度・出題形式の選択
 if not st.session_state.questions:
@@ -82,7 +116,7 @@ elif st.session_state.current_q < len(st.session_state.questions):
         if is_correct:
             st.session_state.score += 1
         st.session_state.current_q += 1
-        # rerunしない。次回描画時にcurrent_qが増えているので問題が切り替わる
+        st.experimental_rerun()
 
 # 結果表示/CSVダウンロード
 else:
@@ -108,12 +142,6 @@ else:
 if st.button("もう一度チャレンジする"):
     st.session_state.questions = []
     st.session_state.user_answers = []
-    st.session_state.current_q = 0
-    st.session_state.score = 0
-    st.session_state.difficulty = None
-    st.session_state.mode = None
-    # rerunしない→状態更新のみ。次回描画時に初期画面に戻る
-
     st.session_state.current_q = 0
     st.session_state.score = 0
     st.session_state.difficulty = None
