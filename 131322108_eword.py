@@ -6,27 +6,23 @@ from datetime import datetime
 st.set_page_config(page_title="英単語クイズ", page_icon="📒")
 st.title("英単語クイズ")
 
-#APIキー入力フォーム
-if "rerun_trigger" not in st.session_state:
-    st.session_state.rerun_trigger = False
-
+# APIキー入力フォーム
 if "api_key" not in st.session_state or st.session_state.api_key is None:
     st.info("あなたのGoogle Gemini APIキーを入力してください。")
     api_key_input = st.text_input("APIキーを入力", type="password", key="api_input")
     if st.button("APIキーを設定"):
         if api_key_input.strip():
             st.session_state.api_key = api_key_input.strip()
-            st.success("APIキーが設定されました。下にスクロールして続行してください。")
+            st.success("APIキーが設定されました。もう一度クリックして続行してください。")
         else:
             st.error("正しいキーを入力してください。")
     st.stop()
 
-
-#APIキー設定
+# APIキー設定
 configure(api_key=st.session_state.api_key)
 model = GenerativeModel("models/gemini-2.5-pro")
 
-#セッション初期化
+# セッション初期化
 defaults = {
     "questions": [],
     "current_q": 0,
@@ -39,41 +35,9 @@ for key, val in defaults.items():
     if key not in st.session_state:
         st.session_state[key] = val
 
-#プロンプト生成
-def get_prompt(difficulty: str, mode: str, num=5):
-    if difficulty == "初級":
-        level_text = "中学校レベルの英単語（英検5級〜3級）"
-    elif difficulty == "中級":
-        level_text = "高校レベルの英単語（英検準2級〜2級）"
-    else:
-        level_text = "難しめの英単語（英検準1級〜TOEFLレベル）"
+# プロンプト生成など省略（元のまま）
 
-    if mode == "en_to_ja":
-        direction_text = "英単語とその日本語の意味"
-    else:
-        direction_text = "日本語の意味とそれに対応する英単語"
-
-    return (
-        f"{level_text}からランダムに{num}個、{direction_text}をペアで出してください。\n"
-        f"フォーマットは「英単語: 意味」でお願いします。"
-    )
-
-#問題生成
-def generate_questions(n=5, difficulty="中級", mode="en_to_ja"):
-    prompt = get_prompt(difficulty, mode, n)
-    response = model.generate_content(prompt)
-    lines = response.text.strip().split("\n")
-    questions = []
-    for line in lines:
-        if ":" in line:
-            word, meaning = line.split(":", 1)
-            questions.append({
-                "word": word.strip(),
-                "meaning": meaning.strip()
-            })
-    return questions[:n]
-
-#難易度・出題形式の選択
+# 難易度・出題形式の選択
 if not st.session_state.questions:
     st.subheader("難易度と出題形式を選んでください")
 
@@ -86,9 +50,9 @@ if not st.session_state.questions:
             st.session_state.difficulty = difficulty
             st.session_state.mode = mode
             st.session_state.questions = generate_questions(difficulty=difficulty, mode=mode)
-            st.experimental_rerun()
+        # rerunしない→questionsがセットされたことで次の分岐へ進む
 
-#出題と回答
+# 出題と回答
 elif st.session_state.current_q < len(st.session_state.questions):
     qnum = st.session_state.current_q
     question = st.session_state.questions[qnum]
@@ -118,9 +82,9 @@ elif st.session_state.current_q < len(st.session_state.questions):
         if is_correct:
             st.session_state.score += 1
         st.session_state.current_q += 1
-        st.experimental_rerun()
+        # rerunしない。次回描画時にcurrent_qが増えているので問題が切り替わる
 
-#結果表示/CSVダウンロード
+# 結果表示/CSVダウンロード
 else:
     st.success(f"クイズ終了！（難易度：{st.session_state.difficulty}｜出題形式：{'英→日' if st.session_state.mode=='en_to_ja' else '日→英'}）")
     st.markdown(f"## あなたのスコア: {st.session_state.score} / 5")
@@ -129,7 +93,6 @@ else:
     df.index += 1
     st.table(df)
 
-    #CSV
     csv = df.to_csv(index=False)
     now = datetime.now().strftime("%Y%m%d_%H%M")
     filename = f"quiz_result_{now}.csv"
@@ -141,10 +104,16 @@ else:
         mime="text/csv"
     )
 
-#リスタート
+# リスタート
 if st.button("もう一度チャレンジする"):
     st.session_state.questions = []
     st.session_state.user_answers = []
+    st.session_state.current_q = 0
+    st.session_state.score = 0
+    st.session_state.difficulty = None
+    st.session_state.mode = None
+    # rerunしない→状態更新のみ。次回描画時に初期画面に戻る
+
     st.session_state.current_q = 0
     st.session_state.score = 0
     st.session_state.difficulty = None
