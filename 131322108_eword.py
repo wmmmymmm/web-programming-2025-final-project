@@ -23,9 +23,11 @@ if not st.session_state.get("api_key"):
             st.error("正しいキーを入力してください。")
     st.stop()
 
+#rerunはセッションが安定した次のサイクルで行う(エラー回避)
 if st.session_state.rerun_trigger:
     st.session_state.rerun_trigger = False
     st.experimental_rerun()
+
 
 #APIキー設定
 configure(api_key=st.session_state.api_key)
