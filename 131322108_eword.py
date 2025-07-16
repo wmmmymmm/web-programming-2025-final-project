@@ -7,23 +7,25 @@ st.set_page_config(page_title="英単語クイズ", page_icon="📒")
 st.title("英単語クイズ")
 
 #APIキー入力フォーム
-if "api_key" not in st.session_state:
-    st.session_state.api_key = ""
+if "rerun_trigger" not in st.session_state:
+    st.session_state.rerun_trigger = False
 
 if not st.session_state.api_key:
-    st.info("あなたのGoogle Gemini APIキーを入力してください。")
+    st.info("APIキーを入力してください。")
     api_key_input = st.text_input("APIキーを入力", type="password", key="api_input")
 
     if st.button("APIキーを設定"):
         if api_key_input.strip():
             st.session_state.api_key = api_key_input.strip()
+            st.session_state.rerun_trigger = True  # rerunトリガー
             st.success("APIキーが設定されました。")
-            st.experimental_rerun()
         else:
             st.error("正しいキーを入力してください。")
-
     st.stop()
 
+if st.session_state.rerun_trigger:
+    st.session_state.rerun_trigger = False
+    st.experimental_rerun()
 
 
 #APIキー設定
