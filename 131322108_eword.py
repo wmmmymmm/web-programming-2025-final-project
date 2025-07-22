@@ -16,7 +16,7 @@ if not st.session_state.api_key:
     if st.button("APIキーを設定"):
         if api_key_input.strip():
             st.session_state.api_key = api_key_input.strip()
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("正しいキーを入力してください。")
     st.stop()
