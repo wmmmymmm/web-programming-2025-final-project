@@ -11,12 +11,13 @@ if "api_key" not in st.session_state:
     st.session_state.api_key = ""
 
 if not st.session_state.api_key:
-    st.info("Google Gemini APIキーを入力してください。")
+    st.info("あなたのGoogle Gemini APIキーを入力してください。")
     api_key_input = st.text_input("APIキーを入力", type="password")
     if st.button("APIキーを設定"):
         if api_key_input.strip():
             st.session_state.api_key = api_key_input.strip()
             st.rerun()
+            st.stop()
         else:
             st.error("正しいキーを入力してください。")
     st.stop()
@@ -87,7 +88,7 @@ if not st.session_state.questions:
             st.session_state.questions = generate_questions(difficulty=difficulty, mode=mode)
             st.rerun()
 
-#出題と回答
+#出題・回答
 elif st.session_state.current_q < len(st.session_state.questions):
     qnum = st.session_state.current_q
     question = st.session_state.questions[qnum]
@@ -128,7 +129,7 @@ else:
     df.index += 1
     st.table(df)
 
-    #CSV
+    #CSVダウンロード
     csv = df.to_csv(index=False)
     now = datetime.now().strftime("%Y%m%d_%H%M")
     filename = f"quiz_result_{now}.csv"
@@ -140,12 +141,11 @@ else:
         mime="text/csv"
     )
 
-#リスタート
-if st.button("もう一度チャレンジする"):
-    st.session_state.questions = []
-    st.session_state.user_answers = []
-    st.session_state.current_q = 0
-    st.session_state.score = 0
-    st.session_state.difficulty = None
-    st.session_state.mode = None
-    st.rerun()
+    if st.button("もう一度チャレンジする"):
+        st.session_state.questions = []
+        st.session_state.user_answers = []
+        st.session_state.current_q = 0
+        st.session_state.score = 0
+        st.session_state.difficulty = None
+        st.session_state.mode = None
+        st.rerun()
