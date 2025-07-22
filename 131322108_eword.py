@@ -129,18 +129,6 @@ else:
     df.index += 1
     st.table(df)
 
-    #CSVダウンロード
-    csv = df.to_csv(index=False)
-    now = datetime.now().strftime("%Y%m%d_%H%M")
-    filename = f"quiz_result_{now}.csv"
-
-    st.download_button(
-        label="結果をCSVで保存",
-        data=csv,
-        file_name=filename,
-        mime="text/csv"
-    )
-
     if st.button("もう一度チャレンジする"):
         st.session_state.questions = []
         st.session_state.user_answers = []
