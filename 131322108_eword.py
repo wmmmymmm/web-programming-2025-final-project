@@ -146,4 +146,4 @@ if st.button("もう一度チャレンジする"):
     st.session_state.score = 0
     st.session_state.difficulty = None
     st.session_state.mode = None
-    st.experimental_rerun()
+    st.rerun()
