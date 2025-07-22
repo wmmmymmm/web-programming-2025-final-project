@@ -116,7 +116,7 @@ elif st.session_state.current_q < len(st.session_state.questions):
         if is_correct:
             st.session_state.score += 1
         st.session_state.current_q += 1
-        st.experimental_rerun()
+        st.rerun()
 
 # 結果表示/CSVダウンロード
 else:
